@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "755833998507",
+    "project_id": "sca-parent-app",
+    "storage_bucket": "sca-parent-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:755833998507:android:fe955f958cc1f67bb6bbee",
+        "android_client_info": {
+          "package_name": "com.saratchandra.scaparentapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBrrueHosiplhO1ulOiWDwoEmiWc64OgSs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
