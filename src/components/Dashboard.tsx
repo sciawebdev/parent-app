@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
-import { NotificationTester } from './NotificationTester'; // Import the tester component
+import { sendTestNotification } from '../utils/fcmHelper';
+// No longer importing NotificationTester
 
 interface DashboardProps {}
 
@@ -206,25 +207,28 @@ export function Dashboard({}: DashboardProps) {
     <div className="min-h-screen bg-gray-50 p-4 sm:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto">
         
-        {/* TEMPORARY TEST BUTTON */}
-        <div className="my-4">
-          <NotificationTester />
-        </div>
-        
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             <span className="text-2xl">��</span>
             <h2 className="text-2xl font-bold text-gray-900">Recent Notifications</h2>
           </div>
-          {unreadCount > 0 && (
+          <div className="flex items-center gap-2">
             <button
-              onClick={markAllRead}
-              className="bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors"
+              onClick={() => sendTestNotification(supabase)}
+              className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
             >
-              ✓ Mark All Read
+              🚀 Send Test Notification
             </button>
-          )}
+            {unreadCount > 0 && (
+              <button
+                onClick={markAllRead}
+                className="bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors"
+              >
+                ✓ Mark All Read
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Search and Filters */}

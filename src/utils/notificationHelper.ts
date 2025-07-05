@@ -28,8 +28,15 @@ export interface NotificationTemplate {
 // Function to send notification via the notification service
 export async function sendNotification(notification: CreateNotificationRequest | NotificationTemplate): Promise<any> {
   try {
-    const { data, error } = await supabase.functions.invoke('notification_service', {
-      body: notification
+    // Backward compatibility: if description provided but message expected by backend
+    // ensure "message" key is present so Edge Function receives it.
+    const payload = { ...notification } as any;
+    if (payload.description && !payload.message) {
+      payload.message = payload.description;
+    }
+
+    const { data, error } = await supabase.functions.invoke('schedule_notifications', {
+      body: payload
     });
 
     if (error) {
@@ -152,5 +159,5 @@ export async function createSampleNotifications() {
 // Export utility function to get notification service URL
 export function getNotificationServiceUrl() {
   const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-  return `${supabaseUrl}/functions/v1/notification_service`;
+  return `${supabaseUrl}/functions/v1/schedule_notifications`;
 } 

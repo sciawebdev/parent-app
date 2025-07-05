@@ -1,0 +1,1 @@
+DROP POLICY IF EXISTS "Allow admins to manage scheduled_notifications" ON public.scheduled_notifications; 
