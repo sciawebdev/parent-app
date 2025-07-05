@@ -1,18 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from './supabaseClient'; // Corrected import
 import { Dashboard } from './components/Dashboard';
 import { AttendanceHistory } from './components/AttendanceHistory';
 import { MarksView } from './components/MarksView';
 import { AdminConsole } from './components/AdminConsole';
 import { AuthScreen } from './components/AuthScreen';
 import { Notifications } from './components/Notifications';
-import { registerFCMToken } from './utils/fcmHelper';
-
-// Initialize Supabase client - use environment variables if available, fallback to parent app project values
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://xxwpbyxymzubrkfaojac.supabase.co';
-const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh4d3BieXh5bXp1YnJrZmFvamFjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE1NDIyNDgsImV4cCI6MjA2NzExODI0OH0.fgmNbzEhJb2-9gtSTkbfNVEKBQ1yz34dHKqwZE0xIbo';
-
-export const supabase = createClient(supabaseUrl, supabaseKey);
+import { registerFCM } from './utils/fcmHelper'; // Corrected import
+import { App as CapacitorApp } from '@capacitor/app';
 
 type Screen = 'dashboard' | 'attendance' | 'marks' | 'admin' | 'announcements' | 'events' | 'profile';
 
@@ -47,110 +42,55 @@ function App() {
   const [notificationCount, setNotificationCount] = useState(5); // Sample count
 
   useEffect(() => {
-    checkUser();
-    
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        await checkUserRole(session.user);
+    setLoading(true);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      const currentUser = session?.user;
+      setUser(currentUser ?? null);
+
+      if (currentUser) {
+        // Simplified logic: check for admin, otherwise default to parent
+        if (currentUser.email === 'admin@admin.com') {
+          setUserRole({ type: 'admin', name: 'System Administrator' });
+        } else {
+          setUserRole({ type: 'parent', name: currentUser.email?.split('@')[0] || 'Parent Account' });
+        }
+        // Register for FCM notifications
+        registerFCM(currentUser, true).catch(err => console.error("FCM Registration failed:", err));
       } else {
         setUserRole({ type: 'parent', name: 'Parent Account' });
       }
       setLoading(false);
     });
+    
+    // Also check initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+        if (!session) {
+            setLoading(false);
+        }
+    });
 
     return () => subscription.unsubscribe();
   }, []);
-
-  const checkUser = async () => {
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        await checkUserRole(session.user);
-      }
-    } catch (error) {
-      console.error('Error checking user:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const checkUserRole = async (user: any) => {
-    try {
-      console.log('Checking user role for:', user.id);
-      
-      // Check if user is an admin in the teachers table (using maybeSingle to avoid errors)
-      const { data: teacher, error: teacherError } = await supabase
-        .from('teachers')
-        .select('name, role')
-        .eq('auth_user_id', user.id)
-        .maybeSingle();
-
-      if (teacherError && !teacherError.message.includes('No rows')) {
-        console.warn('Teacher query error:', teacherError.message);
-      }
-
-      if (teacher && teacher.role === 'admin') {
-        console.log('User is admin:', teacher);
-        setUserRole({
-          type: 'admin',
-          name: teacher.name || 'System Administrator'
-        });
-        
-        // Register FCM token for push notifications after successful role check
-        try {
-          await registerFCMToken(supabase);
-        } catch (fcmError) {
-          console.log('FCM registration non-critical error:', fcmError);
+  
+  // Back button listener
+  useEffect(() => {
+    const setupBackButtonListener = async () => {
+      const listener = await CapacitorApp.addListener('backButton', ({ canGoBack }) => {
+        if (!canGoBack) {
+          CapacitorApp.exitApp();
+        } else {
+          window.history.back();
         }
-        
-        return;
-      }
-
-      // Check if user is a parent (using maybeSingle to avoid errors)
-      const { data: parent, error: parentError } = await supabase
-        .from('parents')
-        .select('id, name')
-        .eq('auth_user_id', user.id)
-        .maybeSingle();
-
-      if (parentError && !parentError.message.includes('No rows')) {
-        console.warn('Parent query error:', parentError.message);
-      }
-
-      console.log('Parent check result:', parent);
-      
-      // Set user role with proper name
-      setUserRole({
-        type: 'parent',
-        name: parent?.name || user.email?.split('@')[0] || 'Parent Account'
       });
+      return listener;
+    };
 
-      // Register FCM token for push notifications after successful role check
-      try {
-        await registerFCMToken(supabase);
-      } catch (fcmError) {
-        console.log('FCM registration non-critical error:', fcmError);
-      }
+    const listenerPromise = setupBackButtonListener();
 
-      // Register FCM token for push notifications after successful role check
-      try {
-        await registerFCMToken(supabase);
-      } catch (fcmError) {
-        console.log('FCM registration non-critical error:', fcmError);
-      }
-
-    } catch (error) {
-      console.error('Error checking user role:', error);
-      // Graceful fallback - set as parent with email-based name
-      setUserRole({ 
-        type: 'parent', 
-        name: user.email?.split('@')[0] || 'User Account'
-      });
-    }
-  };
+    return () => {
+      listenerPromise.then(listener => listener.remove());
+    };
+  }, []);
 
   const handleSignOut = async () => {
     try {

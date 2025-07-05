@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from '../App';
+import { supabase } from '../supabaseClient';
+import { NotificationTester } from './NotificationTester'; // Import the tester component
 
 interface DashboardProps {}
 
@@ -202,139 +203,82 @@ export function Dashboard({}: DashboardProps) {
   }
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-8">
-      {/* Welcome Section */}
-      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-100">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">
-          Welcome back, Parent! 👋
-        </h1>
-        <p className="text-gray-600 text-lg">
-          Stay updated with your child's academic journey
-        </p>
-      </div>
-
-      {/* Quick Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {/* My Children */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-              <span className="text-2xl">👨‍👩‍👧‍👦</span>
-            </div>
+    <div className="min-h-screen bg-gray-50 p-4 sm:p-6 lg:p-8">
+      <div className="max-w-7xl mx-auto">
+        
+        {/* TEMPORARY TEST BUTTON */}
+        <div className="my-4">
+          <NotificationTester />
+        </div>
+        
+        {/* Header */}
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <span className="text-2xl">��</span>
+            <h2 className="text-2xl font-bold text-gray-900">Recent Notifications</h2>
           </div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-1">My Children</h3>
-          <p className="text-3xl font-bold text-gray-900 mb-1">{students.length}</p>
-          <p className="text-sm text-gray-600">Students</p>
+          {unreadCount > 0 && (
+            <button
+              onClick={markAllRead}
+              className="bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors"
+            >
+              ✓ Mark All Read
+            </button>
+          )}
         </div>
 
-        {/* Notifications */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
-              <span className="text-2xl">🔔</span>
+        {/* Search and Filters */}
+        <div className="space-y-4">
+          {unreadCount > 0 && (
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <span className="text-blue-800 font-medium">{unreadCount} unread</span>
             </div>
-          </div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-1">Notifications</h3>
-          <p className="text-3xl font-bold text-gray-900 mb-1">{unreadCount}</p>
-          <p className="text-sm text-gray-600">Unread</p>
-        </div>
-
-        {/* Events */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-              <span className="text-2xl">📅</span>
-            </div>
-          </div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-1">Events</h3>
-          <p className="text-3xl font-bold text-gray-900 mb-1">{events.length}</p>
-          <p className="text-sm text-gray-600">Upcoming</p>
-        </div>
-
-        {/* Results */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
-              <span className="text-2xl">🏆</span>
-            </div>
-          </div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-1">Results</h3>
-          <p className="text-3xl font-bold text-gray-900 mb-1">0</p>
-          <p className="text-sm text-gray-600">Recent</p>
-        </div>
-      </div>
-
-      {/* Recent Notifications Section */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100">
-        <div className="p-6 border-b border-gray-100">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-3">
-              <span className="text-2xl">🔔</span>
-              <h2 className="text-2xl font-bold text-gray-900">Recent Notifications</h2>
-            </div>
-            {unreadCount > 0 && (
-              <button
-                onClick={markAllRead}
-                className="bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors"
-              >
-                ✓ Mark All Read
-              </button>
-            )}
+          )}
+          
+          {/* Search Bar */}
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Search notifications..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+            <span className="absolute left-3 top-3.5 text-gray-400 text-lg">🔍</span>
           </div>
 
-          {/* Search and Filters */}
-          <div className="space-y-4">
-            {unreadCount > 0 && (
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                <span className="text-blue-800 font-medium">{unreadCount} unread</span>
-              </div>
-            )}
-            
-            {/* Search Bar */}
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Search notifications..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-              <span className="absolute left-3 top-3.5 text-gray-400 text-lg">🔍</span>
-            </div>
-
-            {/* Filter Tabs */}
-            <div className="flex gap-2">
-              <button
-                onClick={() => setFilterType('all')}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  filterType === 'all'
-                    ? 'bg-gray-900 text-white'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-              >
-                All
-              </button>
-              <button
-                onClick={() => setFilterType('unread')}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  filterType === 'unread'
-                    ? 'bg-gray-900 text-white'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-              >
-                Unread
-              </button>
-              <button
-                onClick={() => setFilterType('urgent')}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  filterType === 'urgent'
-                    ? 'bg-gray-900 text-white'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-              >
-                Urgent
-              </button>
-            </div>
+          {/* Filter Tabs */}
+          <div className="flex gap-2">
+            <button
+              onClick={() => setFilterType('all')}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                filterType === 'all'
+                  ? 'bg-gray-900 text-white'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+            >
+              All
+            </button>
+            <button
+              onClick={() => setFilterType('unread')}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                filterType === 'unread'
+                  ? 'bg-gray-900 text-white'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+            >
+              Unread
+            </button>
+            <button
+              onClick={() => setFilterType('urgent')}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                filterType === 'urgent'
+                  ? 'bg-gray-900 text-white'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+            >
+              Urgent
+            </button>
           </div>
         </div>
 

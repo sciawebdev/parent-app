@@ -1,4 +1,4 @@
-import { supabase } from '../App';
+import { supabase } from '../supabaseClient';
 
 export interface CreateNotificationRequest {
   type: 'marks' | 'attendance' | 'announcement' | 'fee' | 'meeting' | 'urgent';

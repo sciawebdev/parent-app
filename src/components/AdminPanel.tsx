@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from '../App';
+import { supabase } from '../supabaseClient';
 import { sendNotification } from '../utils/notificationHelper';
 
 type AdminSection = 'dashboard' | 'users' | 'csv-import' | 'calendar' | 'notifications' | 'settings';
