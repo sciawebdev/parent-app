@@ -114,4 +114,4 @@ ios/App/App/public
 .capacitor
 
 # Supabase
-supabase/.temp/ 
+supabase/.temp/ sca-parent-app-firebase-adminsdk-*.json
