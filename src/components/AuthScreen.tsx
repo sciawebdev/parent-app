@@ -28,8 +28,12 @@ export function AuthScreen() {
         });
         if (error) throw error;
       }
-    } catch (error: any) {
-      setError(error.message || 'An error occurred');
+            } catch (error: any) {
+      if (error.message.includes('Email not confirmed')) {
+        setError('Please check your email and click the confirmation link, then try signing in again.');
+      } else {
+        setError(error.message || 'An error occurred');
+      }
     } finally {
       setLoading(false);
     }

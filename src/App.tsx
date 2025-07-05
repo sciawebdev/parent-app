@@ -6,8 +6,9 @@ import { MarksView } from './components/MarksView';
 import { AdminConsole } from './components/AdminConsole';
 import { AuthScreen } from './components/AuthScreen';
 import { Notifications } from './components/Notifications';
+import { registerFCMToken } from './utils/fcmHelper';
 
-// Initialize Supabase client - use environment variables if available, fallback to known values
+// Initialize Supabase client - use environment variables if available, fallback to parent app project values
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://xxwpbyxymzubrkfaojac.supabase.co';
 const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh4d3BieXh5bXp1YnJrZmFvamFjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE1NDIyNDgsImV4cCI6MjA2NzExODI0OH0.fgmNbzEhJb2-9gtSTkbfNVEKBQ1yz34dHKqwZE0xIbo';
 
@@ -87,8 +88,8 @@ function App() {
         .eq('auth_user_id', user.id)
         .maybeSingle();
 
-      if (teacherError) {
-        console.warn('Teacher query error:', teacherError);
+      if (teacherError && !teacherError.message.includes('No rows')) {
+        console.warn('Teacher query error:', teacherError.message);
       }
 
       if (teacher && teacher.role === 'admin') {
@@ -97,29 +98,57 @@ function App() {
           type: 'admin',
           name: teacher.name || 'System Administrator'
         });
+        
+        // Register FCM token for push notifications after successful role check
+        try {
+          await registerFCMToken(supabase);
+        } catch (fcmError) {
+          console.log('FCM registration non-critical error:', fcmError);
+        }
+        
         return;
       }
 
       // Check if user is a parent (using maybeSingle to avoid errors)
       const { data: parent, error: parentError } = await supabase
         .from('parents')
-        .select('id')
+        .select('id, name')
         .eq('auth_user_id', user.id)
         .maybeSingle();
 
-      if (parentError) {
-        console.warn('Parent query error:', parentError);
+      if (parentError && !parentError.message.includes('No rows')) {
+        console.warn('Parent query error:', parentError.message);
       }
 
       console.log('Parent check result:', parent);
+      
+      // Set user role with proper name
       setUserRole({
         type: 'parent',
-        name: 'Parent Account'
+        name: parent?.name || user.email?.split('@')[0] || 'Parent Account'
       });
+
+      // Register FCM token for push notifications after successful role check
+      try {
+        await registerFCMToken(supabase);
+      } catch (fcmError) {
+        console.log('FCM registration non-critical error:', fcmError);
+      }
+
+      // Register FCM token for push notifications after successful role check
+      try {
+        await registerFCMToken(supabase);
+      } catch (fcmError) {
+        console.log('FCM registration non-critical error:', fcmError);
+      }
 
     } catch (error) {
       console.error('Error checking user role:', error);
-      setUserRole({ type: 'parent', name: 'Parent Account' });
+      // Graceful fallback - set as parent with email-based name
+      setUserRole({ 
+        type: 'parent', 
+        name: user.email?.split('@')[0] || 'User Account'
+      });
     }
   };
 

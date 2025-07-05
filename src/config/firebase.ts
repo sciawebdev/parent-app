@@ -5,15 +5,12 @@ import { getAnalytics } from 'firebase/analytics';
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  // Note: Replace these with your actual Firebase config values from Firebase Console
-  // You can find these in Project Settings > General > Your apps > Firebase SDK snippet
-  apiKey: "your-api-key",
-  authDomain: "your-project-id.firebaseapp.com",
-  projectId: "your-project-id",
-  storageBucket: "your-project-id.appspot.com",
-  messagingSenderId: "your-sender-id",
-  appId: "your-app-id",
-  measurementId: "your-measurement-id"
+  apiKey: "AIzaSyBrrueHosiplhO1ulOiWDwoEmiWc64OgSs",
+  authDomain: "sca-parent-app.firebaseapp.com",
+  projectId: "sca-parent-app",
+  storageBucket: "sca-parent-app.firebasestorage.app",
+  messagingSenderId: "755833998507",
+  appId: "1:755833998507:android:fe955f958cc1f67bb6bbee"
 };
 
 // Initialize Firebase
@@ -34,7 +31,7 @@ export const requestNotificationPermission = async () => {
       
       // Get FCM token
       const token = await getToken(messaging, {
-        vapidKey: 'your-vapid-key' // Replace with your VAPID key from Firebase Console
+        vapidKey: 'BLGtuKwdH_LVWmiMB-XQzhN8ZCeBJbgNMcT1Xh4XMmDTwUOrSHGl-9DxVHBNTrKSxchAQUmTQAsMwIJMUNj2YbE ' // Replace with your VAPID key from Firebase Console
       });
       
       if (token) {

@@ -171,7 +171,7 @@ serve(async (req) => {
   }
 
   try {
-    const csvText = await req.text();
+  const csvText = await req.text();
     if (!csvText.trim()) {
       return new Response(JSON.stringify({ error: "Empty CSV data" }), { 
         status: 400,
@@ -185,15 +185,15 @@ serve(async (req) => {
       skipEmptyLines: true 
     });
     
-    if (!Array.isArray(records) || records.length === 0) {
+  if (!Array.isArray(records) || records.length === 0) {
       return new Response(JSON.stringify({ error: "No records found in CSV" }), { 
         status: 400,
         headers: { "Content-Type": "application/json" }
       });
-    }
+  }
 
-    const headers = Object.keys(records[0]);
-    const type = detectType(headers);
+  const headers = Object.keys(records[0]);
+  const type = detectType(headers);
 
     console.log(`Processing ${type} CSV with ${records.length} records`);
     console.log(`Headers: ${headers.join(', ')}`);
