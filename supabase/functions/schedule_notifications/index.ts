@@ -155,20 +155,22 @@ serve(async (req) => {
       fcmSendUrl = 'https://fcm.googleapis.com/fcm/send';
     }
 
+    // We now send data-only payloads; notification will be built client-side in app.
     const fcmResults = [];
     for (const deviceToken of deviceTokens) {
       const isBearer = authHeader['Authorization']?.startsWith('Bearer');
+      // Build data-only payload so Android client handles displaying notification with large icon.
       const body = isBearer ?
-        { message: { token: deviceToken, data: { ...data, type, title, message }, notification: { title, body: message }, android: { notification: { icon: 'ic_stat_notification', color: '#0000FF', sound: 'default' } } } } :
-        { to: deviceToken, data: { ...data, type, title, message }, notification: { title, body: message, sound: 'default' }, android: { notification: { icon: 'ic_stat_notification', color: '#0000FF' } } } ;
+        { message: { token: deviceToken, data: { ...data, type, title, message }, android: { priority: 'HIGH' } } } :
+        { to: deviceToken, data: { ...data, type, title, message }, priority: 'high' } ;
 
       const fcmResponse = await fetch(fcmSendUrl, {
         method: 'POST',
         headers: { ...authHeader, 'Content-Type': 'application/json' },
         body: JSON.stringify(body)
-      });
+    });
 
-      if (!fcmResponse.ok) {
+    if (!fcmResponse.ok) {
         const errorText = await fcmResponse.text();
         console.error(`FCM send failed for token ${deviceToken}:`, errorText);
         fcmResults.push({ token: deviceToken, error: errorText, status: fcmResponse.status });

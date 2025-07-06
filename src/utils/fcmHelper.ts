@@ -6,7 +6,7 @@ import { Capacitor } from '@capacitor/core';
 export async function registerFCM(user: User, isMobile: boolean = false): Promise<void> {
   try {
     console.log('🔔 FCM registration starting...');
-
+    
     // Detect platform: use native plugin on Android/iOS, fallback to web implementation otherwise
     const platform = Capacitor.getPlatform();
     const useNative = platform === 'android' || platform === 'ios';
@@ -53,10 +53,10 @@ export async function registerFCM(user: User, isMobile: boolean = false): Promis
 
     // 🟡 Web fallback (existing logic)
     // Add timeout to prevent hanging
-    const timeoutPromise = new Promise((_, reject) =>
+    const timeoutPromise = new Promise((_, reject) => 
       setTimeout(() => reject(new Error('FCM registration timeout after 10 seconds')), 10000)
     );
-
+    
     const registrationPromise = async () => {
       // Only import Firebase when actually needed
       const { requestNotificationPermission } = await import('../config/firebase');
