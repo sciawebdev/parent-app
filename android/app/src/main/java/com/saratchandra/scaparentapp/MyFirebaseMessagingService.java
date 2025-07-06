@@ -46,7 +46,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         Bitmap largeIcon = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher);
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
-                .setSmallIcon(R.drawable.ic_parent_logo_notification) // custom monochrome notification icon
+                .setSmallIcon(R.drawable.ic_stat_notification) // custom monochrome notification icon
                 .setLargeIcon(largeIcon)                         // shows on lock-screen / expanded panel
                 .setContentTitle(title)
                 .setContentText(message)
